@@ -31,20 +31,19 @@ recommendations
 
 input
 
-if [[ -z "$lower" &&  -z "$upper" && -z "$symbols" && -z "$numbers" ]];then
+if [[ -z "$lower" &&  -z "$upper" && -z "$symbols" && -z "$numbers" ]] || [[ "$lower" -eq 0 && "$upper" -eq 0 && "$symbols" -eq 0 && "$numbers" -eq 0 ]];then
 	while true;do
-		echo "Please enter atleast any one character"
+		echo "Please enter atleast any one character with non-empty and non-zero numbers"
 		echo
 		echo "Press Enter to Escape"
 		read -r
 		clear
-		exec ~/Password-Generator/password.sh
+		exec "$HOME"/Password-Generator/password.sh
 		if [[ -z "$lower" ]] || [[ -z "$upper" ]] || [[ -z "$symbols" ]] || [[ -z "$numbers" ]];then
 			break
 		fi
 	done
 fi
-
 if [[ -z "$numbers" ]]; then
 	numbers=0
 fi
