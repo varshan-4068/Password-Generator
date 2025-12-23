@@ -38,7 +38,7 @@ if [[ -z "$lower" &&  -z "$upper" && -z "$symbols" && -z "$numbers" ]] || [[ "$l
 		echo "Press Enter to Escape"
 		read -r
 		clear
-		exec "$HOME"/Password-Generator/password.sh
+		exec "$(pwd)"/password.sh
 		if [[ -z "$lower" ]] || [[ -z "$upper" ]] || [[ -z "$symbols" ]] || [[ -z "$numbers" ]];then
 			break
 		fi
@@ -66,7 +66,7 @@ for var in upper lower numbers symbols; do
         echo "Invalid input: input must be a number"
 				echo 
 				read -rp "$(tput setaf 4)Press Enter to close${color2}"
-				exec ~/Password-Generator/password.sh
+				exec "$(pwd)"/password.sh
     fi
 done
 
@@ -83,7 +83,7 @@ echo -e "${color1}Password$(tput setaf 4): $password${color3}"
 
 echo "$password" | wl-copy
 
-HASH_FILE="$HOME/Password-Generator/password_hashes"
+HASH_FILE="$(pwd)/password_hashes"
 
 if [ ! -f "$HASH_FILE" ];then
 	touch "$HASH_FILE"
