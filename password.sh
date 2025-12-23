@@ -83,6 +83,75 @@ echo -e "${color1}Password$(tput setaf 4): $password${color3}"
 
 echo "$password" | wl-copy
 
+length=${#password}
+score=0
+classes=0
+
+if (( length >= 8 ));then 
+	((score+=1))
+fi
+
+if (( length >= 12 ));then 
+	((score+=2)) 
+fi
+
+if (( length >= 16 ));then 
+	((score+=2)); 
+fi
+
+if (( upper > 0 )); then
+	((classes++))
+fi
+
+if (( lower > 0 ));then
+	((classes++))
+fi
+
+if (( numbers > 0 ));then
+	((classes++))
+fi
+
+if (( symbols > 0 )); then 
+	((classes++))
+fi
+
+((score+=classes))
+
+if (( score <= 3 )); then
+    strength="Very Weak"
+    bar_color=1
+    bar_fill=2
+elif (( score <= 5 )); then
+    strength="Weak"
+    bar_color=3
+    bar_fill=4
+elif (( score <= 7 )); then
+    strength="Moderate"
+    bar_color=3
+    bar_fill=6
+elif (( score <= 8 )); then
+    strength="Strong"
+    bar_color=2
+    bar_fill=8
+else
+    strength="Very Strong"
+    bar_color=2
+    bar_fill=9
+fi
+
+bar_total=9
+filled=$(printf "%${bar_fill}s" | tr ' ' '|')
+empty=$(printf "%$((bar_total - bar_fill))s" | tr ' ' '-')
+
+(( bar_fill > bar_total )) && bar_fill=$bar_total
+
+percentage=$(( bar_fill*100/bar_total ))
+
+echo
+echo -e "Security Level: $(tput setaf $bar_color)$strength$(tput sgr0)"
+echo -e "[$(tput setaf $bar_color)$filled$(tput setaf 7)$empty] $percentage%"
+
+
 HASH_FILE="$(pwd)/password_hashes"
 
 if [ ! -f "$HASH_FILE" ];then
