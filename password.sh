@@ -44,6 +44,7 @@ if [[ -z "$lower" &&  -z "$upper" && -z "$symbols" && -z "$numbers" ]] || [[ "$l
 		fi
 	done
 fi
+
 if [[ -z "$numbers" ]]; then
 	numbers=0
 fi
@@ -90,7 +91,7 @@ fi
 
 hash=$(echo -n "$password" | sha256sum | cut -d' ' -f1)
 
-grep -q "$hash" "$HASH_FILE" && echo -e "\nWarning: password reused\n"
+grep -q "$hash" "$HASH_FILE" && echo -e "\nWarning: password reused"
 
 echo "$hash" >> "$HASH_FILE"
 
