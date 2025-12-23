@@ -8,7 +8,7 @@ A **lightweight Bash password generator** with customizable character counts, sh
 
 1. Clone the repository:
 
-        git clone https://github.com/<your-username>/Password-Generator.git
+        git clone https://github.com/varshan-4068/Password-Generator.git
         cd Password-Generator
 
 2. Make the script executable:
