@@ -19,9 +19,9 @@ function input(){
 
 function recommendations() {
     echo "$(tput setaf 6)Recommended presets (optional):$(tput sgr0)"
-    echo "  Wi-Fi  → Upper:2  Lower:8  Numbers:2  Symbols:2"
-    echo "  SSH    → Upper:4  Lower:8  Numbers:4  Symbols:4"
-    echo "  Admin  → Upper:4  Lower:10 Numbers:4  Symbols:4"
+    echo "  Wi-Fi  → Upper:2  Lower:10  Numbers:2  Symbols:2"
+    echo "  SSH    → Upper:4  Lower:12  Numbers:4  Symbols:4"
+    echo "  Admin  → Upper:4  Lower:12 Numbers:4  Symbols:4"
     echo
     echo "You can ignore these and choose your own values."
     echo
@@ -63,7 +63,7 @@ fi
 
 for var in upper lower numbers symbols; do
     if ! [[ "${!var}" =~ ^[0-9]+$ ]]; then
-        echo "Invalid input: input must be a number"
+        echo "Invalid input: input must be a non-negative number"
 				echo 
 				read -rp "$(tput setaf 4)Press Enter to close${color2}"
 				exec "$(pwd)"/password.sh
@@ -79,24 +79,41 @@ password=$(
 
 password=$(echo "$password" | fold -w1 | shuf | tr -d '\n')
 
+length=${#password}
+
 echo -e "${color1}Password$(tput setaf 4): $password${color3}"
 
-echo "$password" | wl-copy
+s=$(echo "${color2}|")
 
-length=${#password}
+echo -e "\n<-- Length: ${color1}$length $s ${color3}Upper: ${color1}$upper $s ${color3}Lower: ${color1}$lower $s ${color3}Numbers: ${color1}$numbers $s ${color3}Symbols: ${color1}$symbols ${color3}-->${color2}"
+
+if [ -n "$WAYLAND_DISPLAY" ]; then
+    COPY="wl-copy"
+else
+    COPY="xclip -selection clipboard"
+fi
+
+if ! command -v "$COPY" &>/dev/null; then
+	echo "Clipboard tool ($COPY) not found. Install $($COPY | awk '{print $1}') to enable clipboard copy."
+else
+	echo "$password" | $COPY
+fi
+
+if [ "$upper" -eq 2 ] && [ "$lower" -eq 10 ] && [ "$numbers" -eq 2 ] && [ "$symbols" -eq 2 ]; then
+	echo -e "\n$(tput setaf 4)Strong enough for home Wi-Fi and other web accounts${color2}"
+elif [ "$upper" -eq 4 ] && [ "$lower" -eq 12 ] && [ "$numbers" -eq 4 ] && [ "$symbols" -eq 4 ]; then
+	echo -e "\n$(tput setaf 4)Very strong password for server access${color3}"
+	echo -e "$(tput setaf 4)Long and complex, suitable for admin/root accounts.${color2}"
+fi
+
 score=0
 classes=0
 
 if (( length >= 8 ));then 
-	((score+=1))
-fi
-
-if (( length >= 12 ));then 
-	((score+=2)) 
-fi
-
-if (( length >= 16 ));then 
-	((score+=2)); 
+	score=$(echo "($length - 7)*0.2" | bc)
+	if (( $(echo "$score > 5" | bc) )); then
+			score=5
+	fi
 fi
 
 if (( upper > 0 )); then
@@ -115,42 +132,53 @@ if (( symbols > 0 )); then
 	((classes++))
 fi
 
-((score+=classes))
+score_total=9
 
-if (( score <= 3 )); then
-    strength="Very Weak"
-    bar_color=1
-    bar_fill=2
-elif (( score <= 5 )); then
-    strength="Weak"
-    bar_color=3
-    bar_fill=4
-elif (( score <= 7 )); then
-    strength="Moderate"
-    bar_color=3
-    bar_fill=6
-elif (( score <= 8 )); then
-    strength="Strong"
-    bar_color=2
-    bar_fill=8
-else
-    strength="Very Strong"
-    bar_color=2
-    bar_fill=9
-fi
+score=$(printf "%.0f" "$score")
 
-bar_total=9
-filled=$(printf "%${bar_fill}s" | tr ' ' '|')
-empty=$(printf "%$((bar_total - bar_fill))s" | tr ' ' '-')
+(( score += classes ))
+
+(( score > score_total )) && score=$score_total
+
+percentage=$(echo "scale=2; $score*100/$score_total" | bc)
+
+percentage=$(printf "%.0f" "$percentage")
+
+bar_total=25
+
+bar_fill=$(echo "($percentage * $bar_total) / 100" | bc)
+
+bar_fill=$(printf "%.0f" "$bar_fill")
+
+(( bar_fill < 1 )) && bar_fill=1
 
 (( bar_fill > bar_total )) && bar_fill=$bar_total
 
-percentage=$(( bar_fill*100/bar_total ))
+if (( percentage < 30 )); then
+    strength="Very Weak"
+    bar_color=1
+elif (( percentage < 50)); then
+		strength="Weak"
+		bar_color=3
+elif (( percentage < 70)); then
+    strength="Moderate"
+    bar_color=3
+elif (( percentage < 90 )); then
+    strength="Strong"
+    bar_color=2
+else
+    strength="Very Strong"
+    bar_color=2
+fi
+
+filled=$(printf "%${bar_fill}s" | tr ' ' '|')
+empty=$(printf "%$((bar_total - bar_fill))s" | tr ' ' '-')
 
 echo
-echo -e "Security Level: $(tput setaf $bar_color)$strength$(tput sgr0)"
-echo -e "[$(tput setaf $bar_color)$filled$(tput setaf 7)$empty] $percentage%"
+echo -e "${color1}Security Level: $(tput setaf $bar_color)$strength$(tput sgr0)\n"
+echo -e "${color1}[$(tput setaf $bar_color)$filled$(tput setaf 7)$empty${color1}] ${color1}$percentage%${color2}\n"
 
+echo -e "${color1}Note: ${color3}Strength rating is indicative only and not a cryptographic guarantee.${color2}"
 
 HASH_FILE="$(pwd)/password_hashes"
 
@@ -168,7 +196,7 @@ echo
 
 echo "password generated and copied to clipboard!"
 
-sleep 1.4
+sleep 1
 
 echo
 
