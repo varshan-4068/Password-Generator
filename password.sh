@@ -35,10 +35,10 @@ if [[ -z "$lower" &&  -z "$upper" && -z "$symbols" && -z "$numbers" ]] || [[ "$l
 	while true;do
 		echo "Please enter atleast any one character with non-empty and non-zero numbers"
 		echo
-		echo "Press Enter to Escape"
+		echo "Press Enter to Restart the Password Generator..."
 		read -r
 		clear
-		exec "$(pwd)"/password.sh
+		exec "$0"
 		if [[ -z "$lower" ]] || [[ -z "$upper" ]] || [[ -z "$symbols" ]] || [[ -z "$numbers" ]];then
 			break
 		fi
@@ -89,12 +89,14 @@ echo -e "\n<-- Length: ${color1}$length $s ${color3}Upper: ${color1}$upper $s ${
 
 if [ -n "$WAYLAND_DISPLAY" ]; then
     COPY="wl-copy"
+		COMMAND="wl-copy"
 else
     COPY="xclip -selection clipboard"
+		COMMAND="xclip"
 fi
 
-if ! command -v "$COPY" &>/dev/null; then
-	echo "Clipboard tool ($COPY) not found. Install $($COPY | awk '{print $1}') to enable clipboard copy."
+if ! command -v "$COMMAND" 2&>/dev/null; then
+	echo -e "\n${color1}Clipboard tool (${color2}$(echo "${color2}$COPY" | awk '{print $1}')${color1}) not found. ${color3}Install $(echo "${color2}$COPY" | awk '{print $1}') ${color3}to enable clipboard copy.${color2}"
 else
 	echo "$password" | $COPY
 fi
