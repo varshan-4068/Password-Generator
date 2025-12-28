@@ -2,7 +2,7 @@
 
 A **lightweight Bash password generator** with customizable character counts, shuffling, and clipboard support. Designed for Linux users, it integrates well with bash shell.
 
-<img width="1920" height="1080" alt="screenshot-2025-12-25_17-24-32" src="https://github.com/user-attachments/assets/e54745cb-0989-47ba-b634-8dee478f7b76" />
+<img width="1920" height="1080" alt="screenshot-2025-12-28_13-53-57" src="https://github.com/user-attachments/assets/161b0eb2-75e6-4d22-b359-155411bd814c" />
 
 ## Installation
 
